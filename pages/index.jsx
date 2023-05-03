@@ -1,4 +1,4 @@
-import { NFTCard } from "./components/nftCard";
+import NFTCard from "../components/nftCard.jsx";
 import { useState } from 'react';     
 
 const Home = () => {
@@ -6,6 +6,8 @@ const Home = () => {
   const [collection, setCollectionAddress] = useState("");
   const [NFTs, setNFTs] = useState([]);
   const [fetchForCollection, setFetchForCollection] = useState(false);
+
+
 
   const fetchNFTs = async() => {
     let nfts;
@@ -23,13 +25,11 @@ const Home = () => {
       nfts = await fetch(fetchURL, requestOptions).then(data => data.json());
     // If collection address is provided
     } else {
-      console.log("fetching nfts for collection owned by address");
       const fetchURL = `${baseURL}?owner=${wallet}&contractAddresses%5B%5D=${collection}`;
       nfts = await fetch(fetchURL, requestOptions).then(data => data.json());
     }
     // If nfts exist, set owned nfts
     if(nfts) {
-      console.log("nfts:", nfts);
       setNFTs(nfts.ownedNfts);
     }
   }
@@ -47,16 +47,16 @@ const Home = () => {
       const nfts = await fetch(fetchURL, requestOptions).then(data => data.json());
       // If nfts exist, set nft collections
       if(nfts) {
-        console.log("NFTs in collection:", nfts);
         setNFTs(nfts.nfts);
       }
     }
   }
+
   return (
     // Fetch NFT gallery with walletAddress and collectionAddress
     // if fetched collection, fetch collection for nft
     <div className="flex flex-col items-center justify-center py-8 gap-y-3">
-      <div className="flex flex-col w-full justify-center items-center gap-y-2">
+      <div className="flex flex-col  w-full justify-center items-center gap-y-2">
         <input onChange={(e)=>{setWalletAddress(e.target.value)}} value={wallet} type={"text"} placeholder="Add your wallet address"></input>
         <input onChange={(e)=>{setCollectionAddress(e.target.value)}} value={collection} type={"text"} placeholder="Add the collection address"></input>
         <label className="text-gray-600 "><input onChange={(e)=>{setFetchForCollection(e.target.checked)}} type={"checkbox"} className="mr-2"></input>Fetch for collection</label>
@@ -68,12 +68,15 @@ const Home = () => {
           }
         }>Let's go! </button>
       </div>
-      <div className="flex flex-wrap gap-y-12 mt-4 w-5/6 gap-x-1 justify-center">
+      <div className="flex flex-wrap gap-y-11 mt-4 w-5/6 gap-x-5 justify-center">
         {
-          NFTs.length && NFTs.map(nft => {
-            return (
-              <NFTCard nft={nft}></NFTCard>
-            );
+          NFTs.length && NFTs.map((nft) => {
+            if((nft.contractMetadata.tokenType === "ERC721") && (!nft.media[0].gateway ? nft.metadata.image : nft.media[0].gateway)) {
+              return (
+                <NFTCard nft={nft}></NFTCard>
+              );
+            
+            }
           })
         }
       </div>
